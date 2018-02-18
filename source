@@ -1,0 +1,557 @@
+ORG 100H
+.DATA
+    MSG1 DB 10,13, "----------Welcome!!! to chocolate vending machine----------$"
+    MSG2 DB 10,13, "    Following is the list of chocolates available:$"   
+    MSG3 DB 10,13, "        1.Milkybar-Rs.1/no$"
+    MSG4 DB 10,13, "        2.Dairy Milk Eclairs-Rs.2/no$"
+    MSG5 DB 10,13, "        3.Munch-Rs.5/no$" 
+    MSG6 DB 10,13, "Enter a type: $" 
+    MSG7 DB 10,13, "YOU HAVE ENTERED 1$"
+    MSG8 DB 10,13, "U HAV ENTERED 2$"
+    MSG9 DB 10,13, "U HAVE ENTERED 3$"    
+    MSG10 DB 10,13, "MAX STOCK IS ONLY $"
+    T1 DB 1                    
+    T2 DB 2
+    T3 DB 3 
+    MESG1 DB 10,13, "Enter quantity (IN TERMS OF 00 FORMAT) $" 
+    MESG2 DB 10,13, "(ENTER IN TERMS OF 00 FORMAT) Please give Rs.$" 
+    MESG3 DB 10,13, "AMOUNT PAID...YOU DESERVE $" 
+    MESG4 DB 10,13, "YOU HAVE NOT PAID THE FULL AMOUNT $"   
+    MESG5 DB 10,13, "$" 
+    MESG6 DB 10,13, "YOU HAVE PAID MORE THAN WHAT IS NEEDED $"   
+    MESG7 DB 10,13, "YOU WANT TO PAY THE REST OF THE AMOUNT? (1=YES 0=NO) $"  
+    MESG8 DB 10,13, "(ENTER IN TERMS OF 00 FORMAT)PLEASE GIVE REMAINING AMOUNT... $" 
+    MESG9 DB 10,13, "CHOCOLATES $"          
+    MESG10 DB 10,13, "YOU GET BACK Rs.$"  
+    M1 DB 10,13, "YOU WANT TO PURCHASE AGAIN? (1=YES 0=NO) $"
+    M2 DB 10,13, "THANK YOU FOR USING THE VENDING MACHINE!!! $"
+    COST DB ?                                        
+    REM DB ?  
+    QTY1 DB ?
+    QTY2 DB ?  
+    QTY DB ?
+    TEMP DB ?
+    TYPE DB ?                             
+    C1 DB ?
+    C2 DB ?      
+    PAY DB ?  
+    FLAG DB ?   
+    MAX1 DB 99
+    MAX2 DB 49
+    MAX3 DB 19
+.CODE
+    LEA DX,MSG1
+    MOV AH,09H
+    INT 21H    
+    MOV CX,0AH
+    CALL DELAY1
+ L8:LEA DX,MSG2
+    MOV AH,09H
+    INT 21H
+    MOV CX,0AH
+    CALL DELAY1
+    LEA DX,MSG3
+    MOV AH,09H
+    INT 21H    
+    MOV CX,0AH
+    CALL DELAY1
+    LEA DX,MSG4
+    MOV AH,09H 
+    INT 21H    
+    MOV CX,0AH
+    CALL DELAY1
+    LEA DX,MSG5
+    MOV AH,09H
+    INT 21H    
+    MOV CX,0AH
+    CALL DELAY1
+    LEA DX,MSG6
+    MOV AH,09H
+    INT 21H    
+    MOV CX,0AH
+    CALL DELAY1
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    CMP T1,AL
+    JE TYPE1
+    CMP T2,AL
+    JE TYPE2
+    CMP T3,AL
+    JE TYPE3 
+
+TYPE1:MOV TYPE,1
+    LEA DX,MSG7
+    MOV AH,09H
+    INT 21H 
+    LEA DX,MESG1
+    MOV AH,09H
+    INT 21H 
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY1,AL 
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY2,AL 
+    
+    MOV AL,QTY1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,QTY2
+    MOV QTY,AL
+    
+    MOV CL,QTY
+    CMP CL,MAX1
+    JG MAX_STOCK 
+    
+    ;CMP QTY,0AH
+;    JGE SPL_PRINT_QTY 
+;    MOV DL,QTY
+;    ADD DL,048
+;    MOV AH,2
+;    INT 21H
+       
+    PUSH AX
+    LEA DX,MESG2
+    MOV AH,09H
+    INT 21H 
+    
+    POP AX
+    MOV BL,1
+    MUL BL    
+    MOV COST,AL
+    
+    CMP COST,0AH
+    JGE SPL_PRINT_COST 
+    
+    MOV AH,2 
+    ADD AL,048
+    MOV DL,AL
+    INT 21H 
+    
+L1: LEA DX,MESG5
+    MOV AH,09H
+    INT 21H 
+     
+    MOV AH,1
+    INT 21H  
+    SUB AL,30H
+    MOV C1,AL 
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV C2,AL
+    
+    MOV AL,C1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,C2
+    MOV PAY,AL
+            
+    MOV BL,PAY
+    CMP COST,BL
+    JE PAID 
+    JNE NPAID    
+    HLT
+TYPE2:MOV TYPE,2
+    LEA DX,MSG8
+    MOV AH,09H
+    INT 21H 
+    LEA DX,MESG1
+    MOV AH,09H
+    INT 21H
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY1,AL
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY2,AL  
+    
+    MOV AL,QTY1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,QTY2
+    MOV QTY,AL
+    
+    MOV CL,QTY
+    CMP CL,MAX2
+    JG MAX_STOCK
+    
+    ;CMP QTY,0AH
+;    JGE SPL_PRINT_QTY 
+;    MOV DL,QTY
+;    ADD DL,048
+;    MOV AH,2
+;    INT 21H
+    
+    PUSH AX
+    LEA DX,MESG2
+    MOV AH,09H
+    INT 21H
+    POP AX
+    MOV BL,2
+    MUL BL
+    MOV COST,AL
+    
+    CMP COST,0AH
+    JGE SPL_PRINT_COST 
+
+    MOV AH,2 
+    ADD AL,48
+    MOV DL,AL
+    INT 21H
+L2: LEA DX,MESG5
+    MOV AH,09H
+    INT 21H
+    
+    MOV AH,1
+    INT 21H  
+    SUB AL,30H
+    MOV C1,AL 
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV C2,AL
+    
+    MOV AL,C1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,C2
+    MOV PAY,AL
+            
+    MOV BL,PAY
+    CMP COST,AL
+    JE PAID 
+    JNE NPAID     
+    HLT
+TYPE3:MOV TYPE,3
+    LEA DX,MSG9
+    MOV AH,09H
+    INT 21H 
+    LEA DX,MESG1
+    MOV AH,09H
+    INT 21H        
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY1,AL
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV QTY2,AL
+    
+    MOV AL,QTY1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,QTY2
+    MOV QTY,AL
+    
+    MOV CL,QTY
+    CMP CL,MAX3
+    JG MAX_STOCK
+    
+    ;CMP QTY,0AH
+;    JGE SPL_PRINT_QTY 
+;    MOV DL,QTY
+;    ADD DL,048
+;    MOV AH,2
+;    INT 21H
+    
+    PUSH AX
+    LEA DX,MESG2
+    MOV AH,09H
+    INT 21H  
+    POP AX
+    MOV BL,5
+    MUL BL 
+    MOV COST,AL
+    
+    CMP COST,0AH
+    JGE SPL_PRINT_COST 
+
+    MOV AH,2 
+    ADD AL,048
+    MOV DL,AL
+    INT 21H 
+    
+L3: LEA DX,MESG5
+    MOV AH,09H
+    INT 21H
+    MOV AH,1
+    INT 21H  
+    SUB AL,30H
+    MOV C1,AL 
+    MOV AH,1
+    INT 21H
+    SUB AL,30H
+    MOV C2,AL
+    
+    MOV AL,C1
+    MOV BL,0AH
+    MUL BL
+    ADD AL,C2
+    MOV PAY,AL
+            
+    MOV BL,PAY
+    CMP COST,AL
+    JE PAID  
+    JNE NPAID       
+    HLT
+    
+PAID:LEA DX,MESG3
+     MOV AH,09H
+     INT 21H  
+     CMP QTY,0AH
+     JGE SPL_PRINT_QTY
+     MOV AH,2
+     MOV DL,QTY
+     ADD DL,048
+     INT 21H
+     
+L4:  LEA DX,MESG9
+     MOV AH,09H
+     INT 21H
+     MOV CX,0AH
+     CALL DELAY1
+     JMP STOCK
+     
+L9:  MOV AH,09H
+     LEA DX,MESG5
+     INT 21H
+     
+     MOV AH,09H
+     LEA DX,M1
+     INT 21H
+     MOV AH,1
+     INT 21H
+     SUB AL,30H
+     CMP AL,1
+     JE L8
+     JNE HALT
+     HLT
+
+NPAID:MOV BL,PAY
+      CMP BL,COST
+      JG MORE
+      JL LESS
+      HLT    
+      
+MORE:LEA DX,MESG6
+     MOV AH,09H
+     INT 21H  
+      
+     MOV CX,0AH
+     CALL DELAY1
+     MOV AH,09H
+     LEA DX,M1
+     INT 21H
+     MOV AH,1
+     INT 21H
+     SUB AL,30H
+     CMP AL,1
+     JE L8
+     JNE HALT
+     HLT   
+
+LESS:MOV CL,PAY
+     MOV AL,COST
+     MOV BL,CL
+     SUB AL,BL
+PAYREST:MOV REM,AL
+     MOV CX,0AH
+     CALL DELAY1 
+     MOV AH,09H
+     LEA DX,MESG7
+     INT 21H   
+     MOV AH,1
+     INT 21H 
+     SUB AL,30H
+     CMP AL,1
+     JE REMPAY
+     JNE NOPAY
+     HLT        
+
+REMPAY:LEA DX,MESG8
+       MOV AH,09H
+       INT 21H
+       MOV AH,1
+       INT 21H
+       SUB AL,30H 
+       MOV C1,AL
+       MOV AH,1
+       INT 21H
+       SUB AL,30H
+       MOV C2,AL
+       
+       MOV AL,C1
+       MOV BL,0AH
+       MUL BL
+       ADD AL,C2
+       MOV PAY,AL
+       
+       CMP AL,REM
+       JE PAID 
+       MOV CL,AL
+       MOV AL,REM
+       MOV BL,CL
+       SUB AL,BL
+       JMP PAYREST 
+       HLT
+       
+NOPAY:LEA DX,MESG4
+      MOV AH,09H
+      INT 21H   
+      LEA DX,MESG10
+      MOV AH,09H
+      INT 21H 
+      MOV AL,COST
+      MOV BL,REM
+      SUB AL,BL 
+        
+      MOV FLAG,1
+      MOV COST,AL
+      
+      CMP AL,0AH
+      JGE SPL_PRINT_COST
+      
+      MOV DL,AL
+      ADD DL,048
+      MOV AH,2
+      INT 21H 
+      MOV CX,0AH
+      CALL DELAY1 
+      
+      MOV AH,2
+      LEA DX,M1
+      INT 21H
+      MOV AH,1
+      INT 21H
+      SUB AL,30H
+      CMP AL,1
+      JE L8
+      JNE HALT
+      HLT
+SPL_PRINT_COST:
+         MOV TEMP,0H
+         MOV AX,0H
+         MOV BX,0H
+         
+         MOV AL,COST
+         MOV BL,0AH
+         DIV BL
+         ADD AH,048
+         MOV TEMP,AH
+         
+         MOV AX,0H
+         MOV BX,0H
+         
+         MOV AL,COST
+         MOV BL,0AH
+         DIV BL
+         ADD AL,048
+         MOV DL,AL
+         MOV AH,2
+         INT 21H 
+         
+         MOV DL,TEMP
+         MOV AH,2 
+         INT 21H 
+         
+         CMP FLAG,1
+         JE HALT
+         
+         CMP TYPE,1 
+         JE L1   
+         CMP TYPE,2
+         JE L2
+         CMP TYPE,3
+         JE L3
+
+SPL_PRINT_QTY:
+         MOV TEMP,0H
+         MOV AX,0H
+         MOV BX,0H
+         
+         MOV AL,QTY
+         MOV BL,0AH
+         DIV BL
+         ADD AH,048
+         MOV TEMP,AH
+         
+         MOV AX,0H
+         MOV BX,0H
+         
+         MOV AL,QTY
+         MOV BL,0AH
+         DIV BL
+         ADD AL,048
+         MOV DL,AL
+         MOV AH,2
+         INT 21H 
+         
+         MOV DL,TEMP
+         MOV AH,2 
+         INT 21H 
+         JMP L4    
+
+MAX_STOCK:MOV AH,09H
+         LEA DX,MSG10
+         INT 21H 
+         CMP TYPE,1
+         JE L5
+         CMP TYPE,2
+         JE L6
+         CMP TYPE,3
+         JE L7
+         HLT
+         
+L5:MOV CL,MAX1
+   MOV QTY,CL  
+   JMP SPL_PRINT_QTY
+L6:MOV CL,MAX2
+   MOV QTY,CL
+   JMP SPL_PRINT_QTY
+L7:MOV CL,MAX3
+   MOV QTY,CL
+   JMP SPL_PRINT_QTY
+
+STOCK:CMP TYPE,1
+      JE S1
+      CMP TYPE,2
+      JE S2
+      CMP TYPE,3
+      JE S3
+
+S1:MOV AL,MAX1
+   MOV BL,QTY
+   SUB AL,BL
+   MOV MAX1,AL
+   JMP L9
+   
+S2:MOV AL,MAX2
+   MOV BL,QTY
+   SUB AL,BL
+   MOV MAX2,AL
+   JMP L9
+   
+S3:MOV AL,MAX3
+   MOV BL,QTY
+   SUB AL,BL
+   MOV MAX3,AL
+   JMP L9
+
+HALT:LEA DX,M2
+     MOV AH,09H
+     INT 21H
+     HLT    
+
+PROC DELAY1    
+    JCXZ HALT1
+    DEC CX
+    CALL DELAY1
+HALT1:RET
+ENDP DELAY1   
